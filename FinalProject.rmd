@@ -1,0 +1,42 @@
+---
+title: "LIS4761 Final Project"
+output: html_document
+---
+
+Dependencies (library messages intentionally suppressed):
+```{r message=F}
+# For general purpose usage across the project:
+library(ggplot2)
+library(dplyr)
+# For sentiment analysis:
+library(tidytext)
+library(XML)
+# For association analysis:
+library(arules)
+library(arulesViz)
+```
+
+Data Preparation (Blake Rosenberg):
+```{r}
+
+```
+
+Chunk #1 (Andre Archibald):
+```{r}
+
+```
+
+Chunk #2 (Isaiah Richardson):
+```{r}
+
+```
+
+Chunk #3 (Joseph Bove):
+```{r}
+
+```
+
+Chunk #4 (Kevin Jimenez):
+```{r}
+
+```
