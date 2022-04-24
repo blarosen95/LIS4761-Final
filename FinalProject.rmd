@@ -10,6 +10,8 @@ library(ggplot2)
 library(dplyr)
 # For sentiment analysis:
 library(tidytext)
+library(tidyverse)
+library(tm)
 library(XML)
 library(wordcloud)
 # For association analysis:
@@ -107,7 +109,8 @@ df_quarter_4 <- df_clean[(cutpoint*3+1):nrow(df_clean),]
 
 Chunk #1 (Andre Archibald):
 ```{r}
-smoker <- read_csv("/mnt/chromeos/MyFiles/Downloads/SmokeBan.csv")
+# smoker <- read_csv("/mnt/chromeos/MyFiles/Downloads/SmokeBan.csv")
+smoker <- read_csv("data/SmokeBan.csv")
 dfs <- do.call('rbind', lapply(smoker, as.data.frame))
 words.corpus <- Corpus(VectorSource(dfs))
 
