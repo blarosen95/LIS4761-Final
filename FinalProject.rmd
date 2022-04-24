@@ -109,7 +109,6 @@ df_quarter_4 <- df_clean[(cutpoint*3+1):nrow(df_clean),]
 
 Chunk #1 (Andre Archibald):
 ```{r}
-# smoker <- read_csv("/mnt/chromeos/MyFiles/Downloads/SmokeBan.csv")
 smoker <- read_csv("data/SmokeBan.csv")
 dfs <- do.call('rbind', lapply(smoker, as.data.frame))
 words.corpus <- Corpus(VectorSource(dfs))
