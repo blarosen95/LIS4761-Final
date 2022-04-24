@@ -1,0 +1,191 @@
+---
+title: "LIS4761 Final Project"
+output: html_document
+---
+
+Dependencies (library messages intentionally suppressed):
+```{r message=F}
+# For general purpose usage across the project:
+library(ggplot2)
+library(dplyr)
+# For sentiment analysis:
+library(tidytext)
+library(XML)
+# For association analysis:
+library(arules)
+library(arulesViz)
+library(gridExtra)
+```
+
+Data Preparation (Blake Rosenberg):
+```{r}
+# Set working directory to data folder
+setwd('data')
+# Load the data
+df_raw <- read.csv("SmokeBan.csv", header=TRUE)
+# Set working directory back to project root through traversal
+# TODO: This could be changed to an `output` folder if desired, but I'm not sure we will need it.
+setwd('..')
+
+# Create a dataframe with all columns, renaming X to `PK` (in the event that we need to use a primary key)
+df_clean <- df_raw %>% rename(PK=X)
+# Clean the dataframe: Cast smoker, ban, education, afam, hispanic, and gender to factor
+df_clean$smoker <- as.factor(df_clean$smoker)
+df_clean$ban <- as.factor(df_clean$ban)
+df_clean$education <- as.factor(df_clean$education)
+df_clean$afam <- as.factor(df_clean$afam)
+df_clean$hispanic <- as.factor(df_clean$hispanic)
+df_clean$gender <- as.factor(df_clean$gender)
+
+# Create subsetted dataframes from df_clean:
+# TODO: Remove any subsets that end up going unused
+# 1. Dataframe containing only smokers:
+df_smokers <- df_clean[df_clean$smoker == 'yes',]
+# 2. Dataframe containing only non-smokers:
+df_nonsmokers <- df_clean[df_clean$smoker == 'no',]
+# 3. Dataframe containing only respondents who's workplaces have an indoor smooking ban in place:
+df_banned <- df_clean[df_clean$ban == 'yes',]
+# 4. Dataframe containing only respondents who's workplaces have no indoor smooking ban in place:
+df_unbanned <- df_clean[df_clean$ban == 'no',]
+# 5. Dataframe containing only African American respondents:
+df_afam <- df_clean[df_clean$afam == 'yes',]
+# 6. Dataframe containing only non-African American respondents:
+df_nonafam <- df_clean[df_clean$afam == 'no',]
+# 7. Dataframe containing only Hispanic respondents:
+df_hispanic <- df_clean[df_clean$hispanic == 'yes',]
+# 8. Dataframe containing only non-Hispanic respondents:
+df_nonhispanic <- df_clean[df_clean$hispanic == 'no',]
+# 9. Dataframe containing only male respondents:
+df_male <- df_clean[df_clean$gender == 'male',]
+# 10. Dataframe containing only female respondents:
+df_female <- df_clean[df_clean$gender == 'female',]
+# 11. Dataframe containing only high school drop outs:
+df_dropout <- df_clean[df_clean$education == 'hs drop out',]
+# 12. Dataframe containing only high school graduates:
+df_highschool <- df_clean[df_clean$education == 'hs',]
+# 13. Dataframe containing only respondents who have some college education:
+df_somecollege <- df_clean[df_clean$education == 'some college',]
+# 14. Dataframe containing only respondents who have a college degree:
+df_college <- df_clean[df_clean$education == 'college',]
+# 15. Dataframe containing only respondents who have a master's degree:
+df_master <- df_clean[df_clean$education == 'master',]
+
+# Minimum age observed amongst repondents:
+min_age <- min(df_clean$age)
+# Maximum age observed amongst respondents:
+max_age <- max(df_clean$age)
+
+# Subsets of the dataframe for age groups:
+# TODO: We can redefine these if desired (currently opting for decades)
+# 1. Dataframe containing only respondents who are in their teens:
+df_teens <- df_clean[is.element(df_clean$age, min_age:19),]
+# 2. Dataframe containing only respondents who are in their twenties:
+df_twenties <- df_clean[is.element(df_clean$age, 20:29),]
+# 3. Dataframe containing only respondents who are in their thirties:
+df_thirties <- df_clean[is.element(df_clean$age, 30:39),]
+# 4. Dataframe containing only respondents who are in their fourties:
+df_fourties <- df_clean[is.element(df_clean$age, 40:49),]
+# 5. Dataframe containing only respondents who are in their fifties:
+df_fifties <- df_clean[is.element(df_clean$age, 50:59),]
+# 6. Dataframe containing only respondents who are in their sixties:
+df_sixties <- df_clean[is.element(df_clean$age, 60:69),]
+# 7. Dataframe containing only respondents who are in their seventies:
+df_seventies <- df_clean[is.element(df_clean$age, 70:79),]
+# 8. Dataframe containing only respondents who are in their eighties:
+df_eighties <- df_clean[is.element(df_clean$age, 80:max_age),]
+
+
+# Subsets that are simply quarters of the clean dataframe:
+cutpoint <- nrow(df_clean)/4
+# Note that the parentheses are necessary after the first quarter as colon operator has precedence
+df_quarter_1 <- df_clean[1:cutpoint,]
+df_quarter_2 <- df_clean[(cutpoint+1):(cutpoint*2),]
+df_quarter_3 <- df_clean[(cutpoint*2+1):(cutpoint*3),]
+df_quarter_4 <- df_clean[(cutpoint*3+1):nrow(df_clean),]
+
+```
+
+Chunk #1 (Andre Archibald):
+```{r}
+
+```
+
+Chunk #2 (Isaiah Richardson):
+```{r}
+
+# aRules Data Analysis
+
+summary(df_clean)
+
+# convert dataframe into a transactions dataset
+df_clean.trans <- as(df_clean, "transactions")
+
+# create rules
+ruleset <- apriori(df_clean.trans, parameter = list(support = 0.25, confidence = 0.5))
+ruleset
+summary(ruleset)
+
+# view the contents of each rule
+inspect(ruleset)
+
+# visualization
+plot(ruleset)
+
+# choose rules with high lift value
+goodrules <- ruleset[quality(ruleset)$lift > 1.1]
+inspect(goodrules)
+
+# Conclusion:
+# The three rules that are the most interesting and useful (has the highest 
+# lift value) show that females that are non-Hispanic and non-African American
+# with smoking bans at their jobs are less likely to smoke in the work place
+# than any other worker demographic. Rule 1 indicates that female workers  
+# generally smoke less than males.
+
+```
+
+Chunk #3 (Joseph Bove):
+```{r}
+#For the next 29 lines we set up a series of ggplots to later use them for a side by side comparison
+GGteens <- ggplot(data = df_teens, aes(x = smoker, y = age, color = smoker))+
+  geom_bar(stat='identity')+
+  labs(title = "Teens smokers")
+GGtwenties <- ggplot(data = df_twenties, aes(x = smoker, y = age, color = smoker))+
+  geom_bar(stat='identity')+
+  labs(title = "20's smokers")
+GGthirtes <- ggplot(data = df_thirties, aes(x = smoker, y = age, color = smoker))+
+  geom_bar(stat='identity')+
+  labs(title = "30's smokers")
+GGfourties<- ggplot(data = df_fourties, aes(x = smoker, y = age, color = smoker))+
+  geom_bar(stat='identity')+
+  labs(title = "40's smokers")
+GGfities <- ggplot(data = df_fifties, aes(x = smoker, y = age, color = smoker))+
+  geom_bar(stat='identity')+
+  labs(title = "50's smokers")
+GGsixties <- ggplot(data = df_sixties, aes(x = smoker, y = age, color = smoker))+
+  geom_bar(stat='identity')+
+  labs(title = "60's smokers")
+GGseventies <- ggplot(data = df_seventies, aes(x = smoker, y = age, color = smoker))+
+  geom_bar(stat='identity')+
+  labs(title = "70's smokers")
+GGeightes <- ggplot(data = df_eighties, aes(x = smoker, y = age, color = smoker))+
+  geom_bar(stat='identity')+
+  labs(title = "80's smokers")
+
+#using grid arrange so you can compate all plots side by side
+grid.arrange(GGteens, GGtwenties,GGthirtes,GGfourties,GGfities,GGsixties,GGseventies,GGeightes, ncol = 3)
+
+
+#Density plot to see the how many people are smokers vs non smokers in their respective education level 
+ggplot(df_clean, aes(education))+
+  geom_density(aes(fill=factor(smoker)), alpha = 0.4)+
+  labs(title = "Distribution of smokers to education level")
+
+
+
+```
+
+Chunk #4 (Kevin Jimenez):
+```{r}
+
+```
