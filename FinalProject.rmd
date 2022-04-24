@@ -141,6 +141,35 @@ wordcloud(names(wordCounts), wordCounts, min.freq=0, max.words=50, rot.per=0.45,
 Chunk #2 (Isaiah Richardson):
 ```{r}
 
+# aRules Data Analysis
+
+summary(df_clean)
+
+# convert dataframe into a transactions dataset
+df_clean.trans <- as(df_clean, "transactions")
+
+# create rules
+ruleset <- apriori(df_clean.trans, parameter = list(support = 0.25, confidence = 0.5))
+ruleset
+summary(ruleset)
+
+# view the contents of each rule
+inspect(ruleset)
+
+# visualization
+plot(ruleset)
+
+# choose rules with high lift value
+goodrules <- ruleset[quality(ruleset)$lift > 1.1]
+inspect(goodrules)
+
+# Conclusion:
+# The three rules that are the most interesting and useful (has the highest 
+# lift value) show that females that are non-Hispanic and non-African American
+# with smoking bans at their jobs are less likely to smoke in the work place
+# than any other worker demographic. Rule 1 indicates that female workers  
+# generally smoke less than males.
+
 ```
 
 Chunk #3 (Joseph Bove):
