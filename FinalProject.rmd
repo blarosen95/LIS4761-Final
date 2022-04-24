@@ -11,6 +11,7 @@ library(dplyr)
 # For sentiment analysis:
 library(tidytext)
 library(XML)
+library(wordcloud)
 # For association analysis:
 library(arules)
 library(arulesViz)
@@ -106,6 +107,33 @@ df_quarter_4 <- df_clean[(cutpoint*3+1):nrow(df_clean),]
 
 Chunk #1 (Andre Archibald):
 ```{r}
+smoker <- read_csv("/mnt/chromeos/MyFiles/Downloads/SmokeBan.csv")
+dfs <- do.call('rbind', lapply(smoker, as.data.frame))
+words.corpus <- Corpus(VectorSource(dfs))
+
+words.corpus <- tm_map(words.corpus, content_transformer(tolower))
+
+words.corpus <- tm_map(words.corpus, removeWords, c(stopwords("en"), "can", ""))
+
+words.corpus <- tm_map(words.corpus, removePunctuation)
+
+
+# Wordcloud part.
+tdm <- TermDocumentMatrix(words.corpus)
+tdm
+
+m <- as.matrix(tdm)
+wordCounts <- rowSums(m)
+wordCounts <- sort(wordCounts, decreasing=TRUE)
+
+cloudFrame <- data.frame(word = names(wordCounts), freq=wordCounts)
+
+wordcloud(cloudFrame$word, cloudFrame$freq)
+
+wordcloud(names(wordCounts), wordCounts, min.freq=0, max.words=50, rot.per=0.45, 
+          colors=brewer.pal(5, "Accent"))
+
+# Conclusion - It seems that Female, college, and yes are the three most important parts of sheet. This shows that females in the upper college level are for a ban on smoking.
 
 ```
 
