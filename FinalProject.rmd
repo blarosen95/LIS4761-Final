@@ -10,11 +10,13 @@ library(ggplot2)
 library(dplyr)
 # For sentiment analysis:
 library(tidytext)
+library(tidyverse)
+library(tm)
 library(XML)
+library(wordcloud)
 # For association analysis:
 library(arules)
 library(arulesViz)
-library(gridExtra)
 ```
 
 Data Preparation (Blake Rosenberg):
@@ -107,6 +109,34 @@ df_quarter_4 <- df_clean[(cutpoint*3+1):nrow(df_clean),]
 
 Chunk #1 (Andre Archibald):
 ```{r}
+smoker <- read_csv("data/SmokeBan.csv")
+dfs <- do.call('rbind', lapply(smoker, as.data.frame))
+words.corpus <- Corpus(VectorSource(dfs))
+
+words.corpus <- tm_map(words.corpus, content_transformer(tolower))
+
+words.corpus <- tm_map(words.corpus, removeWords, c(stopwords("en"), "can", ""))
+
+words.corpus <- tm_map(words.corpus, removePunctuation)
+
+
+# Wordcloud part.
+tdm <- TermDocumentMatrix(words.corpus)
+tdm
+
+m <- as.matrix(tdm)
+wordCounts <- rowSums(m)
+wordCounts <- sort(wordCounts, decreasing=TRUE)
+
+cloudFrame <- data.frame(word = names(wordCounts), freq=wordCounts)
+
+wordcloud(cloudFrame$word, cloudFrame$freq)
+
+wordcloud(names(wordCounts), wordCounts, min.freq=0, max.words=50, rot.per=0.45, 
+          colors=brewer.pal(5, "Accent"))
+
+# It seems that Female, college, and yes are the three most important parts of sheet. 
+# This shows that females with a college education work where there is a ban on smoking.
 
 ```
 
@@ -146,42 +176,6 @@ inspect(goodrules)
 
 Chunk #3 (Joseph Bove):
 ```{r}
-#For the next 29 lines we set up a series of ggplots to later use them for a side by side comparison
-GGteens <- ggplot(data = df_teens, aes(x = smoker, y = age, color = smoker))+
-  geom_bar(stat='identity')+
-  labs(title = "Teens smokers")
-GGtwenties <- ggplot(data = df_twenties, aes(x = smoker, y = age, color = smoker))+
-  geom_bar(stat='identity')+
-  labs(title = "20's smokers")
-GGthirtes <- ggplot(data = df_thirties, aes(x = smoker, y = age, color = smoker))+
-  geom_bar(stat='identity')+
-  labs(title = "30's smokers")
-GGfourties<- ggplot(data = df_fourties, aes(x = smoker, y = age, color = smoker))+
-  geom_bar(stat='identity')+
-  labs(title = "40's smokers")
-GGfities <- ggplot(data = df_fifties, aes(x = smoker, y = age, color = smoker))+
-  geom_bar(stat='identity')+
-  labs(title = "50's smokers")
-GGsixties <- ggplot(data = df_sixties, aes(x = smoker, y = age, color = smoker))+
-  geom_bar(stat='identity')+
-  labs(title = "60's smokers")
-GGseventies <- ggplot(data = df_seventies, aes(x = smoker, y = age, color = smoker))+
-  geom_bar(stat='identity')+
-  labs(title = "70's smokers")
-GGeightes <- ggplot(data = df_eighties, aes(x = smoker, y = age, color = smoker))+
-  geom_bar(stat='identity')+
-  labs(title = "80's smokers")
-
-#using grid arrange so you can compate all plots side by side
-grid.arrange(GGteens, GGtwenties,GGthirtes,GGfourties,GGfities,GGsixties,GGseventies,GGeightes, ncol = 3)
-
-
-#Density plot to see the how many people are smokers vs non smokers in their respective education level 
-ggplot(df_clean, aes(education))+
-  geom_density(aes(fill=factor(smoker)), alpha = 0.4)+
-  labs(title = "Distribution of smokers to education level")
-
-
 
 ```
 
