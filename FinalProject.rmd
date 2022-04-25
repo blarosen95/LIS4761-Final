@@ -83,8 +83,8 @@ df_quarter_4 <- df_clean[(cutpoint*3+1):nrow(df_clean),]
 
 Analysis #1:
 ```{r}
-smoker <- read_csv("data/SmokeBan.csv")
-dfs <- do.call('rbind', lapply(smoker, as.data.frame))
+
+dfs <- do.call('rbind', lapply(df_clean, as.data.frame))
 words.corpus <- Corpus(VectorSource(dfs))
 
 words.corpus <- tm_map(words.corpus, content_transformer(tolower))
@@ -151,38 +151,44 @@ inspect(goodrules)
 Analysis #3:
 ```{r}
 #For the next 29 lines we set up a series of ggplots to later use them for a side by side comparison
-GGteens <- ggplot(data = df_teens, aes(x = smoker, y = age, color = smoker))+
+GGteens <- ggplot(data = df_teens, aes(x = age / age, y = smoker, color = smoker))+
   geom_bar(stat='identity')+
-  labs(title = "Teens smokers")
-GGtwenties <- ggplot(data = df_twenties, aes(x = smoker, y = age, color = smoker))+
+  labs(title = "Teens smokers", y = "Smoker?", x = "Total")
+GGtwenties <- ggplot(data = df_twenties, aes(x = age / age, y = smoker, color = smoker))+
   geom_bar(stat='identity')+
-  labs(title = "20's smokers")
-GGthirtes <- ggplot(data = df_thirties, aes(x = smoker, y = age, color = smoker))+
+  labs(title = "20's smokers", y = "Smoker?", x = "Total")
+GGthirties <- ggplot(data = df_thirties, aes(x = age / age, y = smoker, color = smoker))+
   geom_bar(stat='identity')+
-  labs(title = "30's smokers")
-GGfourties<- ggplot(data = df_fourties, aes(x = smoker, y = age, color = smoker))+
+  labs(title = "30's smokers", y = "Smoker?", x = "Total")
+GGfourties<- ggplot(data = df_fourties, aes(x = age / age, y = smoker, color = smoker))+
   geom_bar(stat='identity')+
-  labs(title = "40's smokers")
-GGfities <- ggplot(data = df_fifties, aes(x = smoker, y = age, color = smoker))+
+  labs(title = "40's smokers", y = "Smoker?", x = "Total")
+GGfifties <- ggplot(data = df_fifties, aes(x = age / age, y = smoker, color = smoker))+
   geom_bar(stat='identity')+
-  labs(title = "50's smokers")
-GGsixties <- ggplot(data = df_sixties, aes(x = smoker, y = age, color = smoker))+
+  labs(title = "50's smokers", y = "Smoker?", x = "Total")
+GGsixties <- ggplot(data = df_sixties, aes(x = age / age, y = smoker, color = smoker))+
   geom_bar(stat='identity')+
-  labs(title = "60's smokers")
-GGseventies <- ggplot(data = df_seventies, aes(x = smoker, y = age, color = smoker))+
+  labs(title = "60's smokers", y = "Smoker?", x = "Total")
+GGseventies <- ggplot(data = df_seventies, aes(x = age / age, y = smoker, color = smoker))+
   geom_bar(stat='identity')+
-  labs(title = "70's smokers")
-GGeighties <- ggplot(data = df_eighties, aes(x = smoker, y = age, color = smoker))+
+  labs(title = "70's smokers", y = "Smoker?", x = "Total")
+GGeighties <- ggplot(data = df_eighties, aes(x = age / age, y = smoker, color = smoker))+
   geom_bar(stat='identity')+
-  labs(title = "80's smokers")
+  labs(title = "80's smokers", y = "Smoker?", x = "Total")
 
-#using grid arrange so you can compate all plots side by side
-grid.arrange(GGteens, GGtwenties, GGthirtes, GGfourties, GGfities, GGsixties, GGseventies, GGeighties, ncol = 3)
+#using grid arrange so you can compare all plots side by side
+grid.arrange(GGteens, GGtwenties, GGthirties, GGfourties, GGfifties, GGsixties, GGseventies, GGeighties, ncol = 2)
 
 
 #Density plot to see the how many people are smokers vs non smokers in their respective education level
 ggplot(df_clean, aes(education))+
   geom_density(aes(fill=factor(smoker)), alpha = 0.4)+
   labs(title = "Distribution of smokers to education level")
+
+#Density plot to see the how many people are smokers vs non smokers in their respective age
+ggplot(df_clean, aes(age))+
+  geom_density(aes(fill=factor(smoker)), alpha = 0.4)+
+  labs(title = "Distribution of smokers to age")
+
 
 ```
